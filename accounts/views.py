@@ -6,9 +6,29 @@ from rest_framework import permissions, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
+from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import CompanyProfileSerializer, UserProfileSerializer, MyUserSerializer
 from .models import CompanyProfile, UserProfile, ResetToken
 User = get_user_model()
+
+
+class UserView(APIView):
+    """
+    This method helps show userprofile accoding to user wise and also helps to update user profile.
+    """
+
+    permission_classes = (permissions.AllowAny,)
+
+    def get_object(self):
+        return User.objects.all()
+
+    def get(self, request, email, format=None):
+        user_profile = self.get_object().get(email=email)
+        print(user_profile)
+        serializer = MyUserSerializer(user_profile)
+        data = serializer.data
+        data.pop('password')
+        return Response(data)
 
 
 class SignupView(APIView):
@@ -51,23 +71,24 @@ class UserProfileView(APIView):
     """
     This method helps show userprofile accoding to user wise and also helps to update user profile.
     """
-
-    permission_classes = (permissions.AllowAny,)
+    parser_classes = (MultiPartParser, FormParser)
+    # permission_classes = (permissions.AllowAny,)
 
     def get_object(self):
         return UserProfile.objects.all()
 
-    def get(self, request, pk, format=None):
-        user_profile = self.get_object().get(pk=pk)
+    def get(self, request, pk,  format=None):
+        user_profile = self.get_object().get(user=pk)
         print(user_profile)
         serializer = UserProfileSerializer(user_profile)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        user_profile = self.get_object().get(pk=pk)
+        user_profile = self.get_object().get(user=pk)
         serializer = UserProfileSerializer(user_profile, request.data)
         serializer.is_valid()
         serializer.save()
+
         return Response(serializer.data)
 
 
@@ -75,18 +96,18 @@ class CompanyProfileView(APIView):
     """
     This method helps show companyprofile accoding to user wise and also helps to update company profile.
     """
-    permission_classes = (permissions.AllowAny,)
+    # permission_classes = (permissions.AllowAny,)
 
     def get_object(self):
         return CompanyProfile.objects.all()
 
     def get(self, request, pk, format=None):
-        company_profile = self.get_object().get(pk=pk)
+        company_profile = self.get_object().get(user=pk)
         serializer = CompanyProfileSerializer(company_profile)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
-        company_profile = self.get_object().get(pk=pk)
+        company_profile = self.get_object().get(user=pk)
         print(company_profile.user.id)
 
         # user = User.objects.all().get(pk=company_profile.get('user').get('id'))
@@ -120,7 +141,7 @@ class ResetPasswordView(APIView):
                 current_site = get_current_site(self.request)
                 print(current_site)
                 SUBJECT = f"Reset Password {user.username}"
-                MESSAGE = f"Hello {user.username} from EMEDHUB \n\t click this link to reset password http://{current_site}/api/accounts/activate/{token}/"
+                MESSAGE = f"Hello {user.username} from EMEDHUB \n\t click this link to reset password http://localhost:3000/resettoken/{token}/"
                 send_mail(
                     SUBJECT,
                     'Name: '

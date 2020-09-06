@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,9 +43,15 @@ INSTALLED_APPS = [
     'orders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'django_schema',
+    'corsheaders',
+
+
 ]
 
 MIDDLEWARE = [
+
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -138,8 +145,17 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'SEARCH_PARAM': 'q',
+    'ORDERING_PARAM': 'o',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 3
+    'PAGE_SIZE': 8
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=600),
 }
 
 
@@ -154,3 +170,10 @@ EMAIL_HOST_USER = 'didwhatlab@gmail.com'
 EMAIL_HOST_PASSWORD = 'cbairgstskdzgvxx'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+
+SCHEMA_APPS = [
+    'accounts',
+    'orders',
+    'store',
+]

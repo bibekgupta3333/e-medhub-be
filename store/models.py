@@ -55,7 +55,7 @@ class Product(models.Model):
     category = models.ForeignKey(MainCategory, related_name='main_products',
                                  on_delete=models.CASCADE,  blank=False, null=False)
     sub_category = models.ForeignKey(SubCategory, related_name='sub_products',
-                                     on_delete=models.CASCADE, blank=False, null=False)
+                                     on_delete=models.CASCADE, blank=True, null=True)
     brand = models.ForeignKey(Brand, related_name='brand_products',
                               on_delete=models.CASCADE,  blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)

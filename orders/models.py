@@ -32,7 +32,6 @@ def limit_order_choices():
 class Order(models.Model):
     Payment = (
         ('COD', 'CashOnDelivery'),
-        ('OP', 'OnlinePayment')
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, null=True, blank=True)
@@ -40,6 +39,7 @@ class Order(models.Model):
         OrderedProduct, limit_choices_to=limit_order_choices)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    phone = models.CharField(max_length=15, null=True)
     shipping_address = models.CharField(
         max_length=200, blank=False, null=False, help_text='Please enter the accurate address before ordering')
     amount = models.IntegerField(default=0)

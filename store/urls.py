@@ -12,6 +12,8 @@ urlpatterns = [
     path("brand/<str:slug>/",
          views.BrandUpdateSerializerView.as_view()),
     path("product/", views.ProductSerializerView.as_view()),
+    path("product/create/", views.ProductCreateSerializerView.as_view()),
+    path("product/user/", views.UserProductListView.as_view()),
     path("product/<str:slug>/",
          views.ProductUpdateSerializerView.as_view()),
 ]

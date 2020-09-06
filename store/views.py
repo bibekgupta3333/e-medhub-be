@@ -1,10 +1,12 @@
-from .models import MainCategory, SubCategory, Brand, Product
-from .serializers import BrandSerializer, MainCategorySerializer, SubCategorySerializer, ProductSerializer
-from rest_framework.views import APIView
-from rest_framework import status, generics, permissions
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from django.utils.text import slugify
+from rest_framework import generics, permissions, status
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Brand, MainCategory, Product, SubCategory
+from .serializers import (BrandSerializer, MainCategorySerializer,
+                          ProductSerializer, SubCategorySerializer, ProductCreateSerializer)
+from rest_framework import filters
 
 
 class MainCategorySerializerView(generics.ListCreateAPIView):
@@ -14,6 +16,7 @@ class MainCategorySerializerView(generics.ListCreateAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = MainCategory.objects.all()
     serializer_class = MainCategorySerializer
+    pagination_class = None
 
 
 class MainCategoryUpdateSerializerView(generics.RetrieveUpdateAPIView):
@@ -40,6 +43,7 @@ class SubCategorySerializerView(generics.ListCreateAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = SubCategory.objects.all()
     serializer_class = SubCategorySerializer
+    pagination_class = None
 
 
 class SubCategoryUpdateSerializerView(generics.RetrieveUpdateAPIView):
@@ -66,6 +70,7 @@ class BrandSerializerView(generics.ListCreateAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
+    pagination_class = None
 
 
 class BrandUpdateSerializerView(generics.RetrieveUpdateAPIView):
@@ -92,12 +97,24 @@ class ProductSerializerView(generics.ListCreateAPIView):
     permission_classes = (permissions.AllowAny,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'description',
+                     'generic_name', 'price', 'mfg_company', 'category__name', 'sub_category__name', 'brand__name']
+    ordering_fields = ['created']
 
     def perform_create(self, serializer):
         if not self.request.user:
             serializer.save(user=self.request.user.id)
             return
         serializer.save()
+
+
+class ProductCreateSerializerView(generics.CreateAPIView):
+    """
+        This method helps to creating product and getting product.
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductCreateSerializer
 
 
 class ProductUpdateSerializerView(generics.RetrieveUpdateDestroyAPIView):
@@ -123,3 +140,15 @@ class ProductUpdateSerializerView(generics.RetrieveUpdateDestroyAPIView):
         instance.save()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class UserProductListView(generics.ListAPIView):
+    """
+        This method helps to creating product and getting product.
+    """
+    serializer_class = ProductSerializer
+
+    def get_queryset(self):
+        if self.request.user:
+            return Product.objects.all().filter(user=self.request.user).order_by('-created')
+        return Product.objects.all()

@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 
 from django.views.generic import TemplateView
+import django_schema
+
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -13,6 +15,8 @@ urlpatterns = [
     path('api/store/', include('store.urls', namespace='store')),
     path('api/orders/', include('orders.urls', namespace='orders')),
     path('admin/', admin.site.urls),
+    path('schema/', include('django_schema.urls')),
+
 
 ]
 # urlpatterns += [re_path(r'^.*',
